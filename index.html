@@ -51,7 +51,6 @@
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: #020617;
-            overflow: hidden;
         }
 
         #aurora-background {
@@ -751,11 +750,14 @@
                 resultDiv.appendChild(container);
                 
                 // Push the ad after inserting the ad slot into the DOM
-                try {
-                    (adsbygoogle = window.adsbygoogle || []).push({});
-                } catch (e) {
-                    console.error("AdSense push error:", e);
-                }
+                // Use a timeout to ensure the container is rendered and has a width
+                setTimeout(() => {
+                    try {
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                    } catch (e) {
+                        console.error("AdSense push error:", e);
+                    }
+                }, 100);
 
                 document.getElementById('board-train-btn').addEventListener('click', () => {
                     if (currentJourney) requestLocationAndStart(currentJourney);
@@ -870,3 +872,4 @@
     </script>
 </body>
 </html>
+
