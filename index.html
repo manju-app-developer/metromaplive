@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Futuristic Bengaluru Metro Planner 🚇</title>
+
+    <meta name="description" content="Your futuristic guide to navigating the Bengaluru Metro. Plan your journey, check live timings, and explore the fastest routes with our smart planner.">
+    <meta name="keywords" content="Bengaluru Metro, Namma Metro, Bangalore Metro Planner, Metro Routes, Metro Timings, India, Transit App, Journey Planner">
+    <meta name="author" content="Your Name or Company">
+    <link rel="canonical" href="https://metromaplive.netlify.app">
+
+    <link rel="icon" type="image/png" href="https://placehold.co/32x32/8B5CF6/FFFFFF?text=🚇">
+    <link rel="apple-touch-icon" href="trainlogo.png">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://metromaplive.netlify.app">
+    <meta property="og:title" content="Futuristic Bengaluru Metro Planner 🚇">
+    <meta property="og:description" content="Your futuristic guide to navigating the Bengaluru Metro. Plan your journey with ease.">
+    <meta property="og:image" content="trainlogo.png">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://metromaplive.netlify.app">
+    <meta property="twitter:title" content="Futuristic Bengaluru Metro Planner 🚇">
+    <meta property="twitter:description" content="Your futuristic guide to navigating the Bengaluru Metro. Plan your journey with ease.">
+    <meta property="twitter:image" content="trainlogo.png">
+    <meta name="google-adsense-account" content="ca-pub-1014085303095720">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Google AdSense Script: Replace ca-pub-XXXXXXXXXXXXXXXX with your actual publisher ID -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1014085303095720"
+     crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --glow-color-1: hsla(212,96%,40%,0.5);
+            --glow-color-2: hsla(287,96%,40%,0.5);
+            --glow-color-3: hsla(167,96%,40%,0.5);
+            --glow-color-4: hsla(348,96%,50%,0.5);
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #020617;
+            overflow: hidden;
+        }
+
+        #aurora-background {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background-image: 
+                radial-gradient(at 10% 20%, var(--glow-color-1) 0px, transparent 50%),
+                radial-gradient(at 80% 10%, var(--glow-color-2) 0px, transparent 50%),
+                radial-gradient(at 20% 90%, var(--glow-color-3) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, var(--glow-color-4) 0px, transparent 50%);
+            animation: aurora-flow 25s ease-in-out infinite;
+        }
+
+        @keyframes aurora-flow {
+            0% { transform: rotate(0deg) scale(1.2); opacity: 0.6; }
+            50% { transform: rotate(180deg) scale(1.3); opacity: 0.7; }
+            100% { transform: rotate(360deg) scale(1.2); opacity: 0.6; }
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(167, 139, 250, 0.5); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(167, 139, 250, 0.7); }
+        
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        #train-marker { transition: top 0.5s linear; } /* Smoother transition */
+        .station-pulse { animation: pulse 1s ease-out; }
+        @keyframes pulse { 
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+            50% { transform: scale(1.2); box-shadow: 0 0 5px 10px rgba(255, 255, 255, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <div id="aurora-background"></div>
+
+    <div id="app-container" class="h-screen w-full flex flex-col items-center justify-center p-2 sm:p-4 selection:bg-purple-500/30">
+        
+        <div class="bg-slate-900/70 backdrop-blur-2xl border border-slate-700/60 w-full max-w-md rounded-2xl shadow-2xl shadow-black/50 flex flex-col h-full relative">
+            <button id="install-app-btn" class="hidden absolute top-3 right-3 z-10 bg-indigo-600/80 text-white p-2 rounded-full hover:bg-indigo-500 transition-all shadow-lg" title="Install App">
+                 <i data-lucide="download" class="w-5 h-5"></i>
+            </button>
+            <div id="planner-controls" class="p-4 sm:p-6 border-b border-slate-800/80 transition-opacity duration-300">
+                <div class="text-center mb-4 sm:mb-6">
+                    <h1 class="text-xl font-bold text-gray-200 tracking-wider mb-2">Bengaluru Metro</h1>
+                    <div class="flex justify-center items-center h-10 mb-2">
+                        <svg class="h-full drop-shadow-lg" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg" fill="none">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#a855f7;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#34d399;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M10 90 C 40 10, 60 10, 90 90" stroke="url(#logoGradient)" stroke-width="15" stroke-linecap="round"/>
+                            <path d="M110 90 C 140 10, 160 10, 190 90" stroke="url(#logoGradient)" stroke-width="15" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <p id="live-clock" class="text-xs sm:text-sm text-gray-400 font-mono mt-1 tracking-wider"></p>
+                </div>
+                
+                <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                       <div class="relative">
+                           <i data-lucide="map-pin" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-purple-400 opacity-80"></i>
+                           <select id="start-station" class="w-full pl-10 sm:pl-11 pr-4 py-3 bg-slate-800/80 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-slate-800 rounded-lg shadow-sm appearance-none transition-all duration-200 text-sm sm:text-base"></select>
+                       </div>
+                    <button id="swap-stations" class="p-3 bg-slate-800/80 border border-slate-700 rounded-lg hover:bg-slate-700/50 hover:border-slate-600 transition-all duration-200">
+                         <i data-lucide="arrow-right-left" class="w-4 h-4 sm:w-5 sm:h-5 text-gray-300"></i>
+                    </button>
+                       <div class="relative">
+                        <i data-lucide="flag" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-green-400 opacity-80"></i>
+                         <select id="end-station" class="w-full pl-10 sm:pl-11 pr-4 py-3 bg-slate-800/80 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:bg-slate-800 rounded-lg shadow-sm appearance-none transition-all duration-200 text-sm sm:text-base"></select>
+                    </div>
+                </div>
+            </div>
+            <div id="journey-result" class="px-4 sm:px-6 py-5 bg-black/20 flex-grow overflow-y-auto custom-scrollbar min-h-0"></div>
+        </div>
+        <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm opacity-0 transition-opacity duration-300"></div>
+    </div>
+
+    <script type="module">
+        // --- CONFIGURATION & STATE ---
+        const CONFIG = {
+            DWELL_TIME_SECONDS: 25, INTERCHANGE_TIME_MINUTES: 5, FIRST_TRAIN_HOUR: 5, LAST_TRAIN_HOUR: 23,
+            TIMETABLE: { weekday: { peak: 4, off_peak: 8 }, weekend: { peak: 6, off_peak: 10 } }
+        };
+        const precomputedData = { timeFromStart: {}, timeFromEnd: {}, distanceFromStart: {}, distanceFromEnd: {}, stations: {} };
+        let simulationState = { isActive: false, journeyId: null, timeline: [], startTime: 0, animationFrameId: null, lastStationIndex: -1, locationWatcherId: null, lastLocationUpdateTime: 0 };
+        let currentJourney = null;
+        let deferredInstallPrompt = null;
+
+        // --- DATA WITH GEOLOCATIONS (Timings adjusted for accuracy) ---
+        const metroData = {
+            purple: {
+                name: "Purple Line", color: "#8B5CF6", stations: [
+                    { id: "P01", name: "Whitefield (Kadugodi)", lat: 12.9904, lon: 77.7615, timeToNext: 110, distanceToNext: 2.1, platforms: { forward: 2, backward: 1 } },
+                    { id: "P02", name: "Hopefarm Channasandra", lat: 12.9897, lon: 77.7479, timeToNext: 85, distanceToNext: 1.8, platforms: { forward: 2, backward: 1 } },
+                    { id: "P03", name: "Kadugodi Tree Park", lat: 12.9863, lon: 77.7397, timeToNext: 75, distanceToNext: 1.0, platforms: { forward: 2, backward: 1 } },
+                    { id: "P04", name: "Pattanduru Agrahara", lat: 12.9829, lon: 77.7324, timeToNext: 70, distanceToNext: 0.9, platforms: { forward: 2, backward: 1 } },
+                    { id: "P05", name: "Sri Sathya Sai Hospital", lat: 12.9806, lon: 77.7248, timeToNext: 80, distanceToNext: 1.1, platforms: { forward: 2, backward: 1 } },
+                    { id: "P06", name: "Nallurhalli", lat: 12.9765, lon: 77.7175, timeToNext: 70, distanceToNext: 0.9, platforms: { forward: 2, backward: 1 } },
+                    { id: "P07", name: "Kundalahalli", lat: 12.9715, lon: 77.7126, timeToNext: 85, distanceToNext: 1.2, platforms: { forward: 2, backward: 1 } },
+                    { id: "P08", name: "Seetharampalya", lat: 12.9768, lon: 77.7027, timeToNext: 75, distanceToNext: 1.0, platforms: { forward: 2, backward: 1 } },
+                    { id: "P09", name: "Hoodi", lat: 12.9845, lon: 77.6963, timeToNext: 80, distanceToNext: 1.3, platforms: { forward: 2, backward: 1 } },
+                    { id: "P10", name: "Garudacharpalya", lat: 12.9907, lon: 77.6917, timeToNext: 80, distanceToNext: 1.6, platforms: { forward: 2, backward: 1 } },
+                    { id: "P11", name: "Singayyanapalya", lat: 12.9936, lon: 77.6828, timeToNext: 105, distanceToNext: 1.5, platforms: { forward: 2, backward: 1 } },
+                    { id: "P12", name: "K.R. Puram", lat: 12.9959, lon: 77.6718, timeToNext: 130, distanceToNext: 2.2, platforms: { forward: 2, backward: 1 } },
+                    { id: "P13", name: "Baiyappanahalli", lat: 12.9951, lon: 77.6521, timeToNext: 105, distanceToNext: 1.8, platforms: { forward: 2, backward: 1 } },
+                    { id: "P14", name: "Swami Vivekananda Road", lat: 12.9918, lon: 77.6393, timeToNext: 80, distanceToNext: 1.9, platforms: { forward: 2, backward: 1 } },
+                    { id: "P15", name: "Indiranagar", lat: 12.9781, lon: 77.6406, timeToNext: 95, distanceToNext: 1.4, platforms: { forward: 2, backward: 1 } },
+                    { id: "P16", name: "Halasuru", lat: 12.9781, lon: 77.6276, timeToNext: 90, distanceToNext: 1.2, platforms: { forward: 2, backward: 1 } },
+                    { id: "P17", name: "Trinity", lat: 12.9733, lon: 77.6181, timeToNext: 80, distanceToNext: 1.1, platforms: { forward: 2, backward: 1 } },
+                    { id: "P18", name: "M.G. Road", lat: 12.9756, lon: 77.6083, timeToNext: 105, distanceToNext: 1.4, platforms: { forward: 2, backward: 1 } },
+                    { id: "P19", name: "Cubbon Park", lat: 12.9794, lon: 77.5959, timeToNext: 120, distanceToNext: 2.1, platforms: { forward: 2, backward: 1 } },
+                    { id: "P20", name: "Nadaprabhu Kempegowda Stn., Majestic", lat: 12.9761, lon: 77.5731, timeToNext: 105, distanceToNext: 1.1, interchange: true, interchangeId: 'majestic', platforms: { forward: 2, backward: 1 } },
+                    { id: "P21", name: "KSR City Railway Station", lat: 12.9718, lon: 77.5670, timeToNext: 115, distanceToNext: 1.6, platforms: { forward: 2, backward: 1 } },
+                    { id: "P22", name: "Magadi Road", lat: 12.9782, lon: 77.5542, timeToNext: 130, distanceToNext: 1.3, platforms: { forward: 2, backward: 1 } },
+                    { id: "P23", name: "Hosahalli", lat: 12.9701, lon: 77.5459, timeToNext: 95, distanceToNext: 1.2, platforms: { forward: 2, backward: 1 } },
+                    { id: "P24", name: "Vijayanagar", lat: 12.9613, lon: 77.5372, timeToNext: 90, distanceToNext: 1.1, platforms: { forward: 2, backward: 1 } },
+                    { id: "P25", name: "Attiguppe", lat: 12.9567, lon: 77.5298, timeToNext: 100, distanceToNext: 0.8, platforms: { forward: 2, backward: 1 } },
+                    { id: "P26", name: "Deepanjali Nagar", lat: 12.9496, lon: 77.5262, timeToNext: 100, distanceToNext: 0.9, platforms: { forward: 2, backward: 1 } },
+                    { id: "P27", name: "Mysuru Road", lat: 12.9442, lon: 77.5212, timeToNext: 130, distanceToNext: 2.0, platforms: { forward: 2, backward: 1 } },
+                    { id: "P28", name: "Nayandahalli", lat: 12.9348, lon: 77.5147, timeToNext: 105, distanceToNext: 1.1, platforms: { forward: 2, backward: 1 } },
+                    { id: "P29", name: "Rajarajeshwari Nagar", lat: 12.9269, lon: 77.5104, timeToNext: 110, distanceToNext: 1.0, platforms: { forward: 2, backward: 1 } },
+                    { id: "P30", name: "Jnanabharathi", lat: 12.9213, lon: 77.5015, timeToNext: 105, distanceToNext: 1.5, platforms: { forward: 2, backward: 1 } },
+                    { id: "P31", name: "Pattanagere", lat: 12.9108, lon: 77.4975, timeToNext: 80, distanceToNext: 1.1, platforms: { forward: 2, backward: 1 } },
+                    { id: "P32", name: "Kengeri Bus Terminal", lat: 12.9034, lon: 77.4878, timeToNext: 90, distanceToNext: 1.3, platforms: { forward: 2, backward: 1 } },
+                    { id: "P33", name: "Kengeri", lat: 12.9064, lon: 77.4767, timeToNext: 95, distanceToNext: 1.4, platforms: { forward: 2, backward: 1 } },
+                    { id: "P34", name: "Challaghatta", lat: 12.9056, lon: 77.4619, timeToNext: 0, distanceToNext: 0, platforms: { forward: 2, backward: 1 } }
+                ]
+            },
+            green: {
+                name: "Green Line", color: "#22C55E", stations: [
+                    { id: "G01", name: "Madavara", lat: 13.0645, lon: 77.5218, timeToNext: 90, distanceToNext: 1.2, platforms: { forward: 2, backward: 1 } },
+                    { id: "G02", name: "Chikkabidarakallu", lat: 13.0537, lon: 77.5141, timeToNext: 105, distanceToNext: 1.8, platforms: { forward: 2, backward: 1 } },
+                    { id: "G03", name: "Manjunath Nagar", lat: 13.0428, lon: 77.5102, timeToNext: 95, distanceToNext: 1.5, platforms: { forward: 2, backward: 1 } },
+                    { id: "G04", name: "Nagasandra", lat: 13.0401, lon: 77.5191, timeToNext: 95, distanceToNext: 1.5, platforms: { forward: 2, backward: 1 } },
+                    { id: "G05", name: "Dasarahalli", lat: 13.0336, lon: 77.5297, timeToNext: 90, distanceToNext: 1.2, platforms: { forward: 2, backward: 1 } },
+                    { id: "G06", name: "Jalahalli", lat: 13.0315, lon: 77.5401, timeToNext: 100, distanceToNext: 1.1, platforms: { forward: 2, backward: 1 } },
+                    { id: "G07", name: "Peenya Industry", lat: 13.0298, lon: 77.5492, timeToNext: 90, distanceToNext: 1.0, platforms: { forward: 2, backward: 1 } },
+                    { id: "G08", name: "Peenya", lat: 13.0253, lon: 77.5562, timeToNext: 105, distanceToNext: 1.4, platforms: { forward: 2, backward: 1 } },
+                    { id: "G09", name: "Goraguntepalya", lat: 13.0169, lon: 77.5539, timeToNext: 110, distanceToNext: 0.9, platforms: { forward: 2, backward: 1 } },
+                    { id: "G10", name: "Yeshwanthpur", lat: 13.0229, lon: 77.5501, timeToNext: 105, distanceToNext: 1.5, platforms: { forward: 2, backward: 1 } },
+                    { id: "G11", name: "Sandal Soap Factory", lat: 13.0118, lon: 77.5516, timeToNext: 95, distanceToNext: 1.2, platforms: { forward: 2, backward: 1 } },
+                    { id: "G12", name: "Mahalakshmi", lat: 13.0031, lon: 77.5508, timeToNext: 80, distanceToNext: 0.6, platforms: { forward: 2, backward: 1 } },
+                    { id: "G13", name: "Rajajinagar", lat: 12.9961, lon: 77.5518, timeToNext: 75, distanceToNext: 0.5, platforms: { forward: 2, backward: 1 } },
+                    { id: "G14", name: "Mahakavi Kuvempu Road", lat: 12.9922, lon: 77.5583, timeToNext: 100, distanceToNext: 1.8, platforms: { forward: 2, backward: 1 } },
+                    { id: "G15", name: "Srirampura", lat: 12.9868, lon: 77.5621, timeToNext: 85, distanceToNext: 0.7, platforms: { forward: 2, backward: 1 } },
+                    { id: "G16", name: "Mantri Square Sampige Road", lat: 12.9904, lon: 77.5714, timeToNext: 90, distanceToNext: 1.3, platforms: { forward: 2, backward: 1 } },
+                    { id: "G17", name: "Nadaprabhu Kempegowda Stn., Majestic", lat: 12.9761, lon: 77.5731, timeToNext: 115, distanceToNext: 0.9, interchange: true, interchangeId: 'majestic', platforms: { forward: 4, backward: 3 } },
+                    { id: "G18", name: "Chickpete", lat: 12.9698, lon: 77.5756, timeToNext: 90, distanceToNext: 0.9, platforms: { forward: 2, backward: 1 } },
+                    { id: "G19", name: "Krishna Rajendra Market", lat: 12.9625, lon: 77.5784, timeToNext: 85, distanceToNext: 0.8, platforms: { forward: 2, backward: 1 } },
+                    { id: "G20", name: "National College", lat: 12.9554, lon: 77.5739, timeToNext: 80, distanceToNext: 0.4, platforms: { forward: 2, backward: 1 } },
+                    { id: "G21", name: "Lalbagh Botanical Garden", lat: 12.9497, lon: 77.5796, timeToNext: 105, distanceToNext: 1.3, platforms: { forward: 2, backward: 1 } },
+                    { id: "G22", name: "South End Circle", lat: 12.9398, lon: 77.5815, timeToNext: 95, distanceToNext: 1.0, platforms: { forward: 2, backward: 1 } },
+                    { id: "G23", name: "Jayanagar", lat: 12.9308, lon: 77.5808, timeToNext: 110, distanceToNext: 0.8, platforms: { forward: 2, backward: 1 } },
+                    { id: "G24", name: "Rashtreeya Vidyalaya Road", lat: 12.9221, lon: 77.5830, timeToNext: 95, distanceToNext: 0.9, interchange: true, interchangeId: 'rv_road', platforms: { forward: 2, backward: 1 } },
+                    { id: "G25", name: "Banashankari", lat: 12.9158, lon: 77.5727, timeToNext: 105, distanceToNext: 1.8, platforms: { forward: 2, backward: 1 } },
+                    { id: "G26", name: "Jayaprakash Nagar", lat: 12.9069, lon: 77.5714, timeToNext: 95, distanceToNext: 0.8, platforms: { forward: 2, backward: 1 } },
+                    { id: "G27", name: "Yelachenahalli", lat: 12.8996, lon: 77.5684, timeToNext: 80, distanceToNext: 1.1, platforms: { forward: 2, backward: 1 } },
+                    { id: "G28", name: "Konankunte Cross", lat: 12.8893, lon: 77.5663, timeToNext: 85, distanceToNext: 1.2, platforms: { forward: 2, backward: 1 } },
+                    { id: "G29", name: "Doddakallasandra", lat: 12.8801, lon: 77.5638, timeToNext: 95, distanceToNext: 1.3, platforms: { forward: 2, backward: 1 } },
+                    { id: "G30", name: "Vajarahalli", lat: 12.8718, lon: 77.5612, timeToNext: 75, distanceToNext: 0.9, platforms: { forward: 2, backward: 1 } },
+                    { id: "G31", name: "Talaghattapura", lat: 12.8614, lon: 77.5583, timeToNext: 90, distanceToNext: 1.4, platforms: { forward: 2, backward: 1 } },
+                    { id: "G32", name: "Silk Institute", lat: 12.8504, lon: 77.5552, timeToNext: 0, distanceToNext: 0, platforms: { forward: 2, backward: 1 } }
+                ]
+            },
+            yellow: {
+                name: "Yellow Line", color: "#FBBF24", stations: [
+                    { id: "Y01", name: "Rashtreeya Vidyalaya Road", lat: 12.9221, lon: 77.5830, timeToNext: 90, distanceToNext: 1.1, interchange: true, interchangeId: 'rv_road', platforms: { forward: 3, backward: 1 }},
+                    { id: "Y02", name: "Ragigudda", lat: 12.9174, lon: 77.5898, timeToNext: 80, distanceToNext: 1.0, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y03", name: "Jayadeva Hospital", lat: 12.9175, lon: 77.6006, timeToNext: 95, distanceToNext: 1.2, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y04", name: "BTM Layout", lat: 12.9165, lon: 77.6105, timeToNext: 85, distanceToNext: 0.9, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y05", name: "Central Silk Board", lat: 12.9173, lon: 77.6254, timeToNext: 110, distanceToNext: 1.5, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y06", name: "Bommanahalli", lat: 12.9048, lon: 77.6295, timeToNext: 80, distanceToNext: 0.8, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y07", name: "Hongasandra", lat: 12.8981, lon: 77.6338, timeToNext: 90, distanceToNext: 1.0, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y08", name: "Kudlu Gate", lat: 12.8903, lon: 77.6402, timeToNext: 95, distanceToNext: 1.2, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y09", name: "Singasandra", lat: 12.8824, lon: 77.6465, timeToNext: 80, distanceToNext: 0.9, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y10", name: "Hosa Road", lat: 12.8751, lon: 77.6521, timeToNext: 105, distanceToNext: 1.4, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y11", name: "Beratena Agrahara", lat: 12.8662, lon: 77.6599, timeToNext: 90, distanceToNext: 1.1, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y12", name: "Electronic City", lat: 12.8533, lon: 77.6659, timeToNext: 120, distanceToNext: 1.8, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y13", name: "Infosys Foundation Konappana Agrahara", lat: 12.8430, lon: 77.6698, timeToNext: 80, distanceToNext: 1.0, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y14", name: "Huskur Road", lat: 12.8351, lon: 77.6742, timeToNext: 95, distanceToNext: 1.2, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y15", name: "Hebbagodi", lat: 12.8259, lon: 77.6791, timeToNext: 105, distanceToNext: 1.5, platforms: { forward: 2, backward: 1 } },
+                    { id: "Y16", name: "Bommasandra", lat: 12.8139, lon: 77.6845, timeToNext: 0, distanceToNext: 0, platforms: { forward: 2, backward: 1 } },
+                ]
+            }
+        };
+
+        // --- CORE LOGIC ---
+        function getCurrentSimulatedDate() { return new Date(); }
+
+        function precomputeJourneyData() {
+            for (const lineKey in metroData) {
+                const line = metroData[lineKey];
+                line.stations.forEach((s, index) => {
+                    precomputedData.stations[s.id] = { ...s, lineKey, lineName: line.name, color: line.color, index };
+                });
+                let cumulativeTimeF = 0, cumulativeDistanceF = 0;
+                precomputedData.timeFromStart[line.stations[0].id] = 0;
+                precomputedData.distanceFromStart[line.stations[0].id] = 0;
+                for (let i = 0; i < line.stations.length - 1; i++) {
+                    cumulativeTimeF += (line.stations[i].timeToNext + CONFIG.DWELL_TIME_SECONDS);
+                    cumulativeDistanceF += line.stations[i].distanceToNext;
+                    precomputedData.timeFromStart[line.stations[i + 1].id] = cumulativeTimeF;
+                    precomputedData.distanceFromStart[line.stations[i + 1].id] = cumulativeDistanceF;
+                }
+                let cumulativeTimeB = 0, cumulativeDistanceB = 0;
+                const lastStationId = line.stations[line.stations.length - 1].id;
+                precomputedData.timeFromEnd[lastStationId] = 0;
+                precomputedData.distanceFromEnd[lastStationId] = 0;
+                for (let i = line.stations.length - 1; i > 0; i--) {
+                    cumulativeTimeB += (line.stations[i - 1].timeToNext + CONFIG.DWELL_TIME_SECONDS);
+                    cumulativeDistanceB += line.stations[i - 1].distanceToNext;
+                    precomputedData.timeFromEnd[line.stations[i - 1].id] = cumulativeTimeB;
+                    precomputedData.distanceFromEnd[line.stations[i - 1].id] = cumulativeDistanceB;
+                }
+            }
+        }
+
+        function calculateSingleLineJourney(start, end) {
+            const lineStations = metroData[start.lineKey].stations;
+            const direction = start.index < end.index ? 'forward' : 'backward';
+            const timeData = (direction === 'forward') ? precomputedData.timeFromStart : precomputedData.timeFromEnd;
+            const distanceData = (direction === 'forward') ? precomputedData.distanceFromStart : precomputedData.distanceFromEnd;
+            const totalTime = Math.abs(timeData[end.id] - timeData[start.id]);
+            const totalDistance = Math.abs(distanceData[end.id] - distanceData[start.id]);
+            const path = (direction === 'forward' ? lineStations.slice(start.index, end.index + 1) : lineStations.slice(end.index, start.index + 1).reverse()).map(s => precomputedData.stations[s.id]);
+            const journeyDirectionName = (direction === 'forward') ? lineStations[lineStations.length - 1].name : lineStations[0].name;
+            return { stations: path, time: totalTime, distance: totalDistance, direction, journeyDirectionName, startPlatform: start.platforms[direction], endPlatform: end.platforms[direction === 'forward' ? 'backward' : 'forward'] };
+        }
+
+       function calculateJourney(startId, endId) {
+            if (startId === endId) return null;
+            const startStation = precomputedData.stations[startId];
+            const endStation = precomputedData.stations[endId];
+            const interchangePenalty = CONFIG.INTERCHANGE_TIME_MINUTES * 60;
+            let bestPath = null;
+            if (startStation.lineKey === endStation.lineKey) {
+                bestPath = [calculateSingleLineJourney(startStation, endStation)];
+            } else {
+                const commonInterchanges = Object.values(precomputedData.stations).filter(s => s.interchange && (s.lineKey === startStation.lineKey || s.lineKey === endStation.lineKey)).reduce((acc, s) => { acc[s.interchangeId] = (acc[s.interchangeId] || 0) + 1; return acc; }, {});
+                const possibleInterchangeId = Object.keys(commonInterchanges).find(id => commonInterchanges[id] === 2);
+                if (possibleInterchangeId) {
+                    const interchangeStartLine = findStationByInterchangeId(possibleInterchangeId, startStation.lineKey);
+                    const interchangeEndLine = findStationByInterchangeId(possibleInterchangeId, endStation.lineKey);
+                    const part1 = calculateSingleLineJourney(startStation, interchangeStartLine);
+                    const part2 = calculateSingleLineJourney(interchangeEndLine, endStation);
+                    bestPath = [part1, part2];
+                } else {
+                    if ((startStation.lineKey === 'purple' && endStation.lineKey === 'yellow')) {
+                        const majesticPurple = findStationByInterchangeId('majestic', 'purple');
+                        const majesticGreen = findStationByInterchangeId('majestic', 'green');
+                        const rvRoadGreen = findStationByInterchangeId('rv_road', 'green');
+                        const rvRoadYellow = findStationByInterchangeId('rv_road', 'yellow');
+                        bestPath = [calculateSingleLineJourney(startStation, majesticPurple), calculateSingleLineJourney(majesticGreen, rvRoadGreen), calculateSingleLineJourney(rvRoadYellow, endStation)];
+                    } else if ((startStation.lineKey === 'yellow' && endStation.lineKey === 'purple')) {
+                        const rvRoadYellow = findStationByInterchangeId('rv_road', 'yellow');
+                        const rvRoadGreen = findStationByInterchangeId('rv_road', 'green');
+                        const majesticGreen = findStationByInterchangeId('majestic', 'green');
+                        const majesticPurple = findStationByInterchangeId('majestic', 'purple');
+                        bestPath = [calculateSingleLineJourney(startStation, rvRoadYellow), calculateSingleLineJourney(rvRoadGreen, majesticGreen), calculateSingleLineJourney(majesticPurple, endStation)];
+                    }
+                }
+            }
+            if (!bestPath) return { error: "No route found." };
+            let totalTime = bestPath.reduce((sum, part) => sum + part.time, 0) + Math.max(0, bestPath.length - 1) * interchangePenalty;
+            const totalDistance = bestPath.reduce((sum, part) => sum + part.distance, 0);
+            const totalFare = calculateFare(totalDistance);
+            const firstTrainInfo = getNextDeparture(startId, bestPath[0].direction);
+            return { id: `${startId}-${endId}`, parts: bestPath, totalTime, totalFare, ...firstTrainInfo, interchanges: bestPath.length - 1, totalStops: bestPath.reduce((sum, p) => sum + p.stations.length, 0) - bestPath.length };
+       }
+
+        function findStationByInterchangeId(interchangeId, lineKey) { return Object.values(precomputedData.stations).find(s => s.interchangeId === interchangeId && s.lineKey === lineKey); }
+
+        function getDynamicFrequency() {
+            const now = getCurrentSimulatedDate(); const day = now.getDay(); const hour = now.getHours();
+            const isWeekday = day >= 1 && day <= 5;
+            let baseFrequency = isWeekday ? ((hour >= 8 && hour < 11) || (hour >= 17 && hour < 20) ? CONFIG.TIMETABLE.weekday.peak : CONFIG.TIMETABLE.weekday.off_peak) : (hour >= 11 && hour < 21 ? CONFIG.TIMETABLE.weekend.peak : CONFIG.TIMETABLE.weekend.off_peak);
+            return baseFrequency;
+        }
+        
+        function getNextDeparture(stationId, direction) {
+            const now = getCurrentSimulatedDate();
+            const minutesPastMidnight = now.getHours() * 60 + now.getMinutes();
+            const firstTrainTime = CONFIG.FIRST_TRAIN_HOUR * 60; const lastTrainTime = CONFIG.LAST_TRAIN_HOUR * 60;
+            let timeFromTerminal = (direction === 'forward') ? precomputedData.timeFromStart[stationId] : precomputedData.timeFromEnd[stationId];
+            const timeFromTerminalMinutes = Math.ceil(timeFromTerminal / 60);
+            const firstDepartureAtStation = firstTrainTime + timeFromTerminalMinutes;
+            let isOutsideServiceHours = false; let nextDeparture;
+            if (minutesPastMidnight < firstDepartureAtStation) {
+                isOutsideServiceHours = true; nextDeparture = firstDepartureAtStation;
+            } else {
+                const frequencyMinutes = getDynamicFrequency();
+                const timeSinceFirstDeparture = minutesPastMidnight - firstDepartureAtStation;
+                const trainsMissed = Math.floor(timeSinceFirstDeparture / frequencyMinutes);
+                const lastDeparture = firstDepartureAtStation + trainsMissed * frequencyMinutes;
+                nextDeparture = lastDeparture + frequencyMinutes;
+                if (nextDeparture > lastTrainTime + timeFromTerminalMinutes + 10) {
+                     isOutsideServiceHours = true; nextDeparture = firstDepartureAtStation + 24 * 60;
+                }
+            }
+            const waitMinutes = Math.ceil(nextDeparture - minutesPastMidnight);
+            const departureTime = new Date(now);
+            departureTime.setMinutes(departureTime.getMinutes() + waitMinutes);
+            return { departureTime, waitMinutes, isOutsideServiceHours };
+        }
+
+        // --- UI & UTILITY FUNCTIONS ---
+        function calculateFare(distance) {
+            distance = Math.round(distance * 10) / 10;
+            if (distance <= 2) return 10;
+            if (distance <= 4) return 20;
+            if (distance <= 6) return 30;
+            if (distance <= 8) return 40;
+            if (distance <= 10) return 50;
+            if (distance <= 12) return 60;
+            if (distance <= 20) return 70; // This covers the 15-20km range
+            if (distance <= 25) return 80;
+            return 90; // For distances 25km and above
+        }
+
+        function formatTime(date) { return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }); }
+        function formatTravelTime(minutes) {
+            if (minutes < 60) return `${minutes} min`;
+            const hours = Math.floor(minutes / 60); const remainingMinutes = minutes % 60;
+            if (remainingMinutes === 0) return `${hours} hr`;
+            return `${hours} hr ${remainingMinutes} min`;
+        }
+
+        function populateDropdowns() {
+            const startSelect = document.getElementById('start-station'); const endSelect = document.getElementById('end-station');
+            ['purple', 'green', 'yellow'].forEach(lineKey => {
+                const line = metroData[lineKey]; const optgroup = document.createElement('optgroup');
+                optgroup.label = line.name;
+                line.stations.forEach(station => {
+                    const option = document.createElement('option'); option.value = station.id; option.textContent = station.name;
+                    optgroup.appendChild(option);
+                });
+                startSelect.appendChild(optgroup.cloneNode(true)); endSelect.appendChild(optgroup.cloneNode(true));
+            });
+            const savedStart = localStorage.getItem('startStationId'); const savedEnd = localStorage.getItem('endStationId');
+            if (savedStart && savedEnd) {
+                startSelect.value = savedStart; endSelect.value = savedEnd;
+            } else {
+                startSelect.value = 'P20'; endSelect.value = 'G24';
+            }
+        }
+        
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message; toast.style.opacity = 1;
+            setTimeout(() => { toast.style.opacity = 0; }, 3000);
+        }
+
+        function haversineDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        function stopSimulation() {
+            if (simulationState.animationFrameId) cancelAnimationFrame(simulationState.animationFrameId);
+            if (simulationState.locationWatcherId) {
+                navigator.geolocation.clearWatch(simulationState.locationWatcherId);
+            }
+            sessionStorage.removeItem('activeJourney');
+            sessionStorage.removeItem('simulationState');
+
+            simulationState = { isActive: false, journeyId: null, timeline: [], startTime: 0, animationFrameId: null, lastStationIndex: -1, locationWatcherId: null, lastLocationUpdateTime: 0 };
+            
+            const trainMarker = document.getElementById('train-marker');
+            if(trainMarker) trainMarker.remove();
+
+            document.getElementById('planner-controls').style.opacity = 1;
+            document.querySelectorAll('#planner-controls select, #planner-controls button').forEach(el => el.disabled = false);
+            handleJourneyUpdate();
+        }
+        
+        function generateTimeline(journey) {
+            const timeline = [];
+            let currentTime = 0;
+            let overallStationIndex = 0;
+
+            journey.parts.forEach((part, partIndex) => {
+                part.stations.forEach((station, stationIndex) => {
+                    const stationElement = document.getElementById(`station-${station.id}-${overallStationIndex}`);
+                    
+                    if (partIndex > 0 || stationIndex > 0) {
+                        const isInterchangeHop = stationIndex === 0 && partIndex > 0;
+                        
+                        if (isInterchangeHop) {
+                            currentTime += CONFIG.INTERCHANGE_TIME_MINUTES * 60;
+                        } else {
+                            const prevStationData = part.stations[stationIndex - 1];
+                            currentTime += prevStationData.timeToNext + CONFIG.DWELL_TIME_SECONDS;
+                        }
+                    }
+                    
+                    const arrivalTime = currentTime;
+                    const departureTime = currentTime; 
+
+                    timeline.push({ stationId: station.id, stationName: station.name, arrivalTime, departureTime, element: stationElement });
+                    overallStationIndex++;
+                });
+            });
+            return timeline;
+        }
+
+        function handleLocationUpdate(position) {
+            const now = Date.now();
+            if (now - simulationState.lastLocationUpdateTime < 8000) return; // Throttle updates to every 8 seconds
+            simulationState.lastLocationUpdateTime = now;
+
+            const { latitude, longitude } = position.coords;
+            let closestPointIndex = -1; let minDistance = Infinity;
+
+            simulationState.timeline.forEach((point, index) => {
+                const stationData = precomputedData.stations[point.stationId];
+                const distance = haversineDistance(latitude, longitude, stationData.lat, stationData.lon);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestPointIndex = index;
+                }
+            });
+
+            if (closestPointIndex !== -1 && closestPointIndex >= simulationState.lastStationIndex) {
+                 const timeOffset = simulationState.timeline[closestPointIndex].arrivalTime;
+                 simulationState.startTime = Date.now() - (timeOffset * 1000);
+                 sessionStorage.setItem('simulationState', JSON.stringify({ startTime: simulationState.startTime, journeyId: simulationState.journeyId, useLiveLocation: true }));
+                 console.log(`Location sync: Snapped to ${simulationState.timeline[closestPointIndex].stationName}`);
+            }
+        }
+
+        function handleLocationError(error) {
+            console.warn(`Geolocation Error: ${error.message}`);
+            showToast("Live location tracking lost.");
+            if (simulationState.locationWatcherId) {
+                navigator.geolocation.clearWatch(simulationState.locationWatcherId);
+                simulationState.locationWatcherId = null;
+            }
+        }
+
+        function requestLocationAndStart(journey) {
+            if (!journey) return;
+            if (!navigator.geolocation) {
+                showToast("Geolocation is not supported. Using time-based simulation.");
+                startSimulation(journey, false); // Start without location
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    showToast("Location access granted.");
+                    startSimulation(journey, true); // Start with location tracking
+                },
+                (error) => {
+                    showToast("Location denied. Starting time-based journey.");
+                    startSimulation(journey, false); // Start without location tracking
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+
+        function startSimulation(journey, useLiveLocation, startTimeOverride) {
+            if (!journey) return;
+
+            simulationState.isActive = true;
+            simulationState.journeyId = journey.id;
+            simulationState.startTime = startTimeOverride || Date.now();
+            simulationState.timeline = generateTimeline(journey);
+            simulationState.lastStationIndex = -1;
+            
+            sessionStorage.setItem('activeJourney', JSON.stringify(journey));
+            sessionStorage.setItem('simulationState', JSON.stringify({ startTime: simulationState.startTime, journeyId: journey.id, useLiveLocation: useLiveLocation }));
+
+            document.getElementById('planner-controls').style.opacity = 0.5;
+            document.querySelectorAll('#planner-controls select, #planner-controls button').forEach(el => el.disabled = true);
+            
+            const buttonContainer = document.getElementById('board-train-btn-container');
+            if (buttonContainer) {
+                buttonContainer.innerHTML = `
+                    <div id="simulation-status" class="w-full text-center bg-slate-800/60 p-3 rounded-lg border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-purple-300 text-left flex items-center gap-2"><span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span></span>Live Journey</p>
+                            <p class="text-xs text-gray-400 mt-1 text-left">Next: <span id="next-station-name">Loading...</span></p>
+                        </div>
+                        <button id="exit-journey-btn" class="bg-red-500/80 text-white font-bold px-3 py-1.5 rounded-md text-xs hover:bg-red-500 transition-colors">Exit</button>
+                    </div>`;
+                document.getElementById('exit-journey-btn').addEventListener('click', stopSimulation);
+            }
+            
+            const routeContainer = document.getElementById('route-container');
+            if(routeContainer && !document.getElementById('train-marker')) {
+                const trainMarker = document.createElement('div');
+                trainMarker.id = 'train-marker';
+                trainMarker.className = 'absolute left-[-4px] sm:left-[-3.5px] z-20 transition-all duration-300';
+                trainMarker.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 drop-shadow-lg"><path d="M5 12.5L7.5 5H16.5L19 12.5L18 15.5H6L5 12.5Z" fill="white"/><path d="M9.5 15.5H14.5L15 18H9L9.5 15.5Z" fill="white"/></svg>`;
+                routeContainer.prepend(trainMarker);
+            }
+
+            if (useLiveLocation && navigator.geolocation && simulationState.locationWatcherId === null) {
+                showToast('Starting live location tracking...');
+                simulationState.locationWatcherId = navigator.geolocation.watchPosition(
+                    handleLocationUpdate, handleLocationError, 
+                    { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+                );
+            } else if (!useLiveLocation) {
+                // Toast is already shown in requestLocationAndStart, no need for another.
+            } else {
+                showToast('Live tracking unavailable. Using time-based simulation.');
+            }
+
+            simulationState.animationFrameId = requestAnimationFrame(updateSimulation);
+        }
+
+        function updateSimulation() {
+            if (!simulationState.isActive) return;
+
+            const elapsedTime = (Date.now() - simulationState.startTime) / 1000;
+            const timeline = simulationState.timeline;
+
+            let currentSegmentIndex = -1;
+            for(let i=0; i < timeline.length - 1; i++) {
+                if (elapsedTime >= timeline[i].departureTime && elapsedTime < timeline[i+1].arrivalTime) {
+                    currentSegmentIndex = i; break;
+                }
+            }
+
+            const trainMarker = document.getElementById('train-marker');
+            if (!trainMarker) { stopSimulation(); return; }
+
+            let currentStationIndex = -1;
+            for (let i = timeline.length - 1; i >= 0; i--) {
+                if (elapsedTime >= timeline[i].arrivalTime) {
+                    currentStationIndex = i; break;
+                }
+            }
+            
+            if (currentStationIndex !== -1) {
+                if(simulationState.lastStationIndex !== currentStationIndex) {
+                    timeline[currentStationIndex].element?.querySelector('.station-marker-dot')?.classList.add('station-pulse');
+                    setTimeout(() => {
+                        timeline[currentStationIndex].element?.querySelector('.station-marker-dot')?.classList.remove('station-pulse');
+                    }, 1000);
+                    simulationState.lastStationIndex = currentStationIndex;
+                }
+                const nextStationNameEl = document.getElementById('next-station-name');
+                if (nextStationNameEl) nextStationNameEl.textContent = timeline[currentStationIndex + 1]?.stationName || 'Destination';
+            }
+
+            if (currentSegmentIndex !== -1) {
+                const startSegment = timeline[currentSegmentIndex];
+                const endSegment = timeline[currentSegmentIndex + 1];
+                if (startSegment.element && endSegment.element) {
+                    const segmentDuration = endSegment.arrivalTime - startSegment.departureTime;
+                    const timeIntoSegment = elapsedTime - startSegment.departureTime;
+                    const progress = Math.min(timeIntoSegment / segmentDuration, 1);
+                    const startY = startSegment.element.offsetTop;
+                    const endY = endSegment.element.offsetTop;
+                    trainMarker.style.top = `${startY + (endY - startY) * progress}px`;
+                }
+            } else if (currentStationIndex !== -1 && timeline[currentStationIndex]?.element) {
+               trainMarker.style.top = `${timeline[currentStationIndex].element.offsetTop}px`;
+            }
+
+            if (elapsedTime >= timeline[timeline.length - 1].arrivalTime) {
+                const simStatus = document.getElementById('simulation-status');
+                if (simStatus) {
+                     simStatus.innerHTML = `
+                         <div>
+                             <p class="font-bold text-green-400 text-left">You have arrived!</p>
+                             <p class="text-xs text-gray-400 mt-1 text-left">Journey complete.</p>
+                         </div>
+                         <button id="exit-journey-btn" class="bg-red-500/80 text-white font-bold px-3 py-1.5 rounded-md text-xs hover:bg-red-500 transition-colors">Exit</button>
+                     `;
+                    document.getElementById('exit-journey-btn').addEventListener('click', stopSimulation);
+                }
+
+                if (simulationState.animationFrameId) {
+                    cancelAnimationFrame(simulationState.animationFrameId);
+                    simulationState.animationFrameId = null;
+                }
+                if (simulationState.locationWatcherId) {
+                    navigator.geolocation.clearWatch(simulationState.locationWatcherId);
+                    simulationState.locationWatcherId = null;
+                }
+                
+                const trainMarker = document.getElementById('train-marker');
+                if (trainMarker && timeline.length > 0) {
+                    const lastElement = timeline[timeline.length - 1].element;
+                    if(lastElement) trainMarker.style.top = `${lastElement.offsetTop}px`;
+                }
+
+            } else {
+                simulationState.animationFrameId = requestAnimationFrame(updateSimulation);
+            }
+        }
+        
+        function displayJourneyResult(journey) {
+            currentJourney = journey; 
+            const resultDiv = document.getElementById('journey-result');
+             if (!journey) {
+                 resultDiv.innerHTML = `<div class="text-center text-yellow-400 p-4 rounded-lg"><p>Please select two different stations.</p></div>`;
+                 return;
+             }
+            if (journey.error) {
+                resultDiv.innerHTML = `<div class="text-center text-red-400 p-4 rounded-lg"><p>${journey.error}</p></div>`;
+                return;
+            }
+
+            if(simulationState.isActive && simulationState.journeyId !== journey.id) {
+                showToast("A journey is in progress. Please exit the current journey to plan a new one.");
+                return;
+            }
+            
+            if(!simulationState.isActive) {
+                resultDiv.innerHTML = ''; 
+                const totalMinutes = Math.ceil(journey.totalTime / 60);
+                const arrivalTime = new Date(journey.departureTime.getTime() + totalMinutes * 60000);
+                const container = document.createElement('div');
+                container.className = 'animate-fade-in';
+                
+                container.innerHTML = `
+                    <div class="grid grid-cols-3 gap-2 sm:gap-3 text-center mb-4">
+                          <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700/80">
+                            <div class="text-xs text-gray-400 flex items-center justify-center gap-1.5"><i data-lucide="clock" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>Next</div>
+                            <div class="font-bold text-lg sm:text-xl text-purple-300 mt-1">${journey.waitMinutes <= 1 ? 'Now' : journey.waitMinutes + 'm'}</div>
+                        </div>
+                          <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700/80">
+                            <div class="text-xs text-gray-400 flex items-center justify-center gap-1.5"><i data-lucide="timer" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>Time</div>
+                            <div class="font-bold text-lg sm:text-xl mt-1">${formatTravelTime(totalMinutes)}</div>
+                        </div>
+                          <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700/80">
+                            <div class="text-xs text-gray-400 flex items-center justify-center gap-1.5"><i data-lucide="ticket" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>Est. Fare</div>
+                            <div class="font-bold text-lg sm:text-xl text-green-300 mt-1">₹${journey.totalFare}</div>
+                        </div>
+                    </div>
+                    ${journey.isOutsideServiceHours ? `<div class="mb-4 text-center text-amber-300 p-3 bg-amber-900/40 rounded-lg border border-amber-500/30 text-xs"><p class="font-semibold">Outside Service Hours</p><p>Showing timings for the next available train.</p></div>` : ''}
+
+                    <div id="board-train-btn-container" class="my-4">
+                        <button id="board-train-btn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3 rounded-lg shadow-lg hover:from-purple-500 hover:to-indigo-500 transition-all duration-300 flex items-center justify-center gap-2">
+                            <i data-lucide="play-circle" class="w-5 h-5"></i>
+                            Start Live Journey
+                        </button>
+                        <p class="text-center text-xs text-gray-500 mt-2">This is not an official BMRCL app. Timings and fare are estimates, please confirm at stations.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold mb-4 text-gray-300 text-lg">Route Details</h3>
+                        
+                        <!-- Sponsored Ad Section -->
+                        <div class="my-4">
+                            <p class="text-xs text-gray-500 mb-1 pl-1">Sponsored</p>
+                            <div class="bg-slate-800/50 rounded-lg border border-slate-700/80 min-h-[100px]">
+                                <ins class="adsbygoogle"
+                                     style="display:block;width:100%;"
+                                     data-ad-client="ca-pub-1014085303095720"
+                                     data-ad-slot="1037031566"
+                                     data-ad-format="auto"
+                                     data-full-width-responsive="true"></ins>
+                            </div>
+                        </div>
+                        <!-- End Sponsored Ad Section -->
+                        
+                        <div id="route-container" class="relative">
+                            <ul id="route-list" class="space-y-0 -ml-1"></ul>
+                        </div>
+                    </div>
+                `;
+
+                const routeList = container.querySelector('#route-list');
+                let routeHtml = ''; let overallStationIndex = 0;
+                journey.parts.forEach((part, partIndex) => {
+                    part.stations.forEach((s, i) => {
+                        const isLastPart = partIndex === journey.parts.length - 1;
+                        const isFirstStationOfJourney = partIndex === 0 && i === 0;
+                        const isLastStationOfJourney = isLastPart && i === part.stations.length - 1;
+                        const isInterchangeAlight = !isLastPart && i === part.stations.length - 1;
+                        const nextPartStation = journey.parts[partIndex + 1]?.stations[0];
+                        const connectorColor = isInterchangeAlight ? `linear-gradient(to bottom, ${s.color}, ${nextPartStation?.color})` : s.color;
+
+                        routeHtml += renderStation(s, {
+                            isStart: isFirstStationOfJourney, isEnd: isLastStationOfJourney, isInterchange: isInterchangeAlight,
+                            startPlatform: part.startPlatform, journeyDirectionName: part.journeyDirectionName,
+                            departureTime: journey.departureTime, arrivalTime: arrivalTime,
+                            interchangeDetails: journey.parts[partIndex + 1],
+                            connectorColor: connectorColor
+                        }, overallStationIndex++);
+                    });
+                });
+                routeList.innerHTML = routeHtml;
+
+                resultDiv.appendChild(container);
+                
+                // Push the ad after inserting the ad slot into the DOM
+                try {
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                } catch (e) {
+                    console.error("AdSense push error:", e);
+                }
+
+                document.getElementById('board-train-btn').addEventListener('click', () => {
+                    if (currentJourney) requestLocationAndStart(currentJourney);
+                });
+                lucide.createIcons();
+            }
+        }
+
+        function renderStation(station, details, overallStationIndex) {
+            const { isStart, isEnd, isInterchange, startPlatform, journeyDirectionName, departureTime, arrivalTime, interchangeDetails, connectorColor } = details;
+            let platformInfo = '', timeInfo = '';
+
+            if (isStart) {
+                platformInfo = `<div class="text-xs mt-1.5 text-purple-300 bg-purple-500/10 border border-purple-500/30 px-2.5 py-1.5 rounded-md font-medium">Board at <b>Platform ${startPlatform}</b> towards <b>${journeyDirectionName}</b></div>`;
+                timeInfo = `<p class="text-xs text-gray-400 mt-2">Depart at: <b>${formatTime(departureTime)}</b></p>`;
+            }
+            if (isEnd) {
+                timeInfo = `<p class="text-xs text-gray-400">Arrive at: <b>${formatTime(arrivalTime)}</b></p>`;
+            }
+            if (isInterchange) {
+                platformInfo = `<div class="mt-2.5 p-2.5 text-xs font-semibold text-yellow-200 bg-yellow-500/10 border border-yellow-500/40 rounded-lg">
+                    <p class="flex items-center gap-2"><i data-lucide="arrow-down-up" class="w-5 h-5 flex-shrink-0 text-yellow-300"></i><span>Change to ${interchangeDetails.stations[0].lineName} (Platform ${interchangeDetails.startPlatform}) for train towards <b>${interchangeDetails.journeyDirectionName}</b>.</span></p>
+                </div>`;
+            }
+
+            return `
+                <li id="station-${station.id}-${overallStationIndex}" class="flex space-x-4">
+                    <div class="relative flex flex-col items-center">
+                        <div class="absolute top-0 w-1.5 h-full z-0">
+                             ${!isEnd ? `<div class="w-full h-full" style="background:${connectorColor}"></div>` : ''}
+                        </div>
+                        <div class="h-5 w-5 rounded-full flex items-center justify-center z-10 mt-1 shrink-0 station-marker-dot" style="background-color: ${station.color}; border: 2px solid #1e293b;">
+                            <div class="h-1.5 w-1.5 bg-white/80 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="flex-grow pb-8 pt-0.5">
+                        <p class="font-bold text-white text-base">${station.name}</p>
+                        ${timeInfo}${platformInfo}
+                    </div>
+                </li>`;
+        }
+        
+        function updateClock() { document.getElementById('live-clock').textContent = getCurrentSimulatedDate().toLocaleTimeString('en-IN', { timeStyle: 'medium', hour12: true }); }
+
+        function handleJourneyUpdate() { 
+            const startStationSelect = document.getElementById('start-station');
+            const endStationSelect = document.getElementById('end-station');
+            localStorage.setItem('startStationId', startStationSelect.value);
+            localStorage.setItem('endStationId', endStationSelect.value);
+            const journey = calculateJourney(startStationSelect.value, endStationSelect.value); 
+            displayJourneyResult(journey); 
+        }
+
+        // --- INITIALIZATION ---
+        function initializeApp() {
+            lucide.createIcons();
+            const installButton = document.getElementById('install-app-btn');
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault(); deferredInstallPrompt = e;
+                if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
+                   installButton.classList.remove('hidden');
+                }
+            });
+
+            installButton.addEventListener('click', async () => {
+                installButton.classList.add('hidden'); deferredInstallPrompt.prompt();
+                const { outcome } = await deferredInstallPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                deferredInstallPrompt = null;
+            });
+
+            window.addEventListener('appinstalled', () => {
+                installButton.classList.add('hidden'); deferredInstallPrompt = null;
+                showToast('App installed successfully!');
+            });
+
+            const startSelect = document.getElementById('start-station'); const endSelect = document.getElementById('end-station'); const swapButton = document.getElementById('swap-stations');
+            
+            precomputeJourneyData(); 
+            populateDropdowns();
+            
+            swapButton.addEventListener('click', () => { 
+                if (simulationState.isActive) return;
+                const temp = startSelect.value; startSelect.value = endSelect.value; endSelect.value = temp; 
+                handleJourneyUpdate(); 
+            });
+            startSelect.addEventListener('change', handleJourneyUpdate); endSelect.addEventListener('change', handleJourneyUpdate);
+            
+            const savedJourneyJSON = sessionStorage.getItem('activeJourney');
+            const savedSimStateJSON = sessionStorage.getItem('simulationState');
+
+            if (savedJourneyJSON && savedSimStateJSON) {
+                const savedJourney = JSON.parse(savedJourneyJSON);
+                const savedSimState = JSON.parse(savedSimStateJSON);
+                
+                // Re-hydrate Date objects which are stored as strings
+                savedJourney.departureTime = new Date(savedJourney.departureTime);
+                
+                displayJourneyResult(savedJourney);
+                startSimulation(savedJourney, savedSimState.useLiveLocation, savedSimState.startTime);
+            } else {
+                handleJourneyUpdate();
+            }
+
+            updateClock(); 
+            setInterval(updateClock, 1000); 
+            setInterval(() => { if (!simulationState.isActive) handleJourneyUpdate(); }, 30000);
+        }
+
+        initializeApp();
+    </script>
+</body>
+</html>

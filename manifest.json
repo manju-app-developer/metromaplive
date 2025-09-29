@@ -1,0 +1,21 @@
+{
+  "name": "Bengaluru Metro Planner",
+  "short_name": "MetroPlan",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "description": "A futuristic and real-time Namma Metro journey planner.",
+  "icons": [
+    {
+      "src": "trainlogo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "trainlogo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
